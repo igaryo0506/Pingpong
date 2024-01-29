@@ -29,8 +29,10 @@ struct GameView: View {
                 }
                 Spacer(minLength: 100)
             }
-            BallView(ball: $gameViewModel.ball)
-                .position(CGPoint(x: gameViewModel.ball.position.x, y: gameViewModel.ball.position.y))
+            ForEach(0 ..< gameViewModel.balls.count, id: \.self) { ballIndex in
+                BallView(ball: $gameViewModel.balls[ballIndex])
+                    .position(CGPoint(x: gameViewModel.balls[ballIndex].position.x, y: gameViewModel.balls[ballIndex].position.y))
+            }
         }
         .background(.gray)
         .ignoresSafeArea()
@@ -41,7 +43,7 @@ class GameViewModel: ObservableObject {
     let xLength = 8
     let yLength = 16
     @Published var bricks: [[Brick]]
-    @Published var ball: Ball
+    @Published var balls: [Ball] = []
     private var boardFrame: CGRect = .zero
     var width: CGFloat {
         boardFrame.width
@@ -52,41 +54,65 @@ class GameViewModel: ObservableObject {
     
     init() {
         self.bricks = Array(repeating: Array(repeating: .init(color: .black), count: xLength), count: yLength / 2) + Array(repeating: Array(repeating: .init(), count: xLength), count: yLength / 2)
-        self.ball = .init(position: .zero, color: .blue)
     }
     
     func prepare(boardFrame: CGRect) {
-        self.ball.position = .init(x: boardFrame.midX, y: boardFrame.minY + 10)
+        self.balls = [
+            .init(
+                position: .init(x: boardFrame.midX, y: boardFrame.minY + 10),
+                color: .white,
+                direction: .init(dx: 5, dy: 10)
+            ),
+            .init(position: .init(x: boardFrame.midX, y: boardFrame.maxY - 10), color: .black)
+        ]
         self.boardFrame = boardFrame
     }
     
     func start() {
-        var timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+        Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { [weak self] _ in
             guard let self else { return }
-            self.ball.update()
+            for ballIndex in 0 ..< self.balls.count {
+                self.balls[ballIndex].update()
+            }
             checkConflict()
         }
     }
     
     func checkConflict() {
-        if boardFrame.minX > ball.position.x {
-            ball.toggleDirectionX()
+        for ballIndex in 0 ..< self.balls.count {
+            if boardFrame.minX > balls[ballIndex].position.x {
+                balls[ballIndex].toggleDirectionX()
+            }
+            if boardFrame.maxX < balls[ballIndex].position.x {
+                balls[ballIndex].toggleDirectionX()
+            }
+            if boardFrame.minY > balls[ballIndex].position.y {
+                balls[ballIndex].toggleDirectionY()
+            }
+            if boardFrame.maxY < balls[ballIndex].position.y {
+                balls[ballIndex].toggleDirectionY()
+            }
+            let coordinate: (Int,Int) = (
+                Int((balls[ballIndex].position.x - boardFrame.minX) / (width / CGFloat(xLength))),
+                Int((balls[ballIndex].position.y - boardFrame.minY) / (height / CGFloat(yLength)))
+            )
+            let lastCoordinate: (Int,Int) = (
+                Int((balls[ballIndex].lastPosition.x - boardFrame.minX) / (width / CGFloat(xLength))),
+                Int((balls[ballIndex].lastPosition.y - boardFrame.minY) / (height / CGFloat(yLength)))
+            )
+            if 0 > coordinate.0 || coordinate.0 >= xLength || 0 > coordinate.1 || coordinate.1 >= yLength {
+                continue
+            }
+            if coordinate.0 != lastCoordinate.0 && balls[ballIndex].color == bricks[coordinate.1][coordinate.0].color {
+                bricks[coordinate.1][coordinate.0].toggle()
+                balls[ballIndex].toggleDirectionX()
+            }
+            if coordinate.1 != lastCoordinate.1 && balls[ballIndex].color == bricks[coordinate.1][coordinate.0].color{
+                bricks[coordinate.1][coordinate.0].toggle()
+                balls[ballIndex].toggleDirectionY()
+            }
         }
-        if boardFrame.maxX < ball.position.x {
-            ball.toggleDirectionX()
-        }
-        if boardFrame.minY > ball.position.y {
-            ball.toggleDirectionY()
-        }
-        if boardFrame.maxY < ball.position.y {
-            ball.toggleDirectionY()
-        }
-        var xIndex = Int((ball.position.x - boardFrame.minX) / (width / CGFloat(xLength)))
-        var yIndex = Int((ball.position.y - boardFrame.minY) / (height / CGFloat(yLength)))
-        if 0 <= xIndex && xIndex < xLength && 0 <= yIndex && yIndex < yLength {
-            bricks[yIndex][xIndex].toggle()
-        }
-        print(xIndex, yIndex)
+        print("")
     }
 }
 
@@ -96,7 +122,7 @@ struct BallView: View {
     var body: some View {
         Circle()
             .frame(width: 16, height: 16)
-            .foregroundStyle(.blue)
+            .foregroundStyle(ball.color)
     }
 }
 
@@ -113,13 +139,19 @@ struct BrickView: View {
 
 struct Ball {
     var id: UUID = .init()
-    var position: CGPoint
+    var position: CGPoint {
+        didSet {
+            lastPosition = oldValue
+        }
+    }
     var color: Color
     var direction: CGVector
-    init(position: CGPoint, color: Color) {
+    var lastPosition: CGPoint
+    init(position: CGPoint, color: Color, direction: CGVector = .init(dx: 3, dy: 1)) {
         self.position = position
+        self.lastPosition = .zero
         self.color = color
-        self.direction = .init(dx: 10, dy: 5)
+        self.direction = direction
     }
     mutating func update() {
         position = CGPoint(x: position.x + direction.dx, y: position.y + direction.dy)
