@@ -16,5 +16,5 @@ struct BallView: View {
 }
 
 #Preview {
-    BallView()
+    BallView(ball: .constant(.init(position: .zero, color: .black)))
 }
