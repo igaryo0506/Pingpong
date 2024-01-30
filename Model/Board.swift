@@ -11,6 +11,7 @@ struct Board {
     var balls: [Ball] = []
     private var boardFrame: CGRect = .zero
     let size: Size
+    var barPosition: CGPoint = .init(x: 100, y: 0)
     
     var width: CGFloat {
         boardFrame.width
@@ -27,36 +28,39 @@ struct Board {
     mutating func setBalls(boardFrame: CGRect) {
         self.balls = [
             .init(
-                position: .init(x: boardFrame.midX, y: boardFrame.minY + 10),
+                position: .init(x: boardFrame.midX, y: boardFrame.minY + 100),
                 color: .white,
                 direction: .init(dx: 5, dy: 10)
             ),
             .init(
-                position: .init(x: boardFrame.midX, y: boardFrame.maxY - 10),
-                color: .black
+                position: .init(x: boardFrame.midX, y: boardFrame.maxY - 100),
+                color: .black,
+                direction: .init(dx: 4, dy: 3)
             )
         ]
         self.boardFrame = boardFrame
     }
     
     mutating func update() {
-        updateBallState()
-        checkConflict()
-    }
-    
-    mutating func updateBallState() {
-        for ballIndex in 0 ..< self.balls.count {
-            self.balls[ballIndex].update()
-        }
-    }
-    
-    mutating func checkConflict() {
-        balls = balls.map { ball in
+        var newBricks:[[Brick]] = bricks
+        var newBalls: [Ball] = []
+        for ball in balls {
             var newBall = ball
-            newBall = checkConflictWithWall(ball: newBall)
-            (newBall, bricks) = checkConflictWithBrick(ball: newBall, bricks: bricks)
-            return newBall
+            newBall.update()
+            (newBall, newBricks) = checkConflict(ball: newBall, oldBricks: newBricks)
+            newBalls += [newBall]
         }
+        bricks = newBricks
+        balls = newBalls
+    }
+    
+    func checkConflict(ball: Ball, oldBricks: [[Brick]]) -> (Ball, [[Brick]]) {
+        var newBall = ball
+        var newBricks = oldBricks
+        newBall = checkConflictWithWall(ball: newBall)
+        (newBall, newBricks) = checkConflictWithBrick(ball: newBall, bricks: newBricks)
+        newBall = checkConflictWithBar(ball: newBall)
+        return (newBall,newBricks)
     }
     
     func checkConflictWithWall(ball: Ball) -> Ball {
@@ -73,10 +77,10 @@ struct Board {
             newBall.toggleDirectionY()
             newBall.position.y = boardFrame.minY * 2 - newBall.position.y
         }
-        if boardFrame.maxY <= ball.position.y {
-            newBall.toggleDirectionY()
-            newBall.position.y = boardFrame.maxY * 2 - newBall.position.y
-        }
+//        if boardFrame.maxY <= ball.position.y {
+//            newBall.toggleDirectionY()
+//            newBall.position.y = boardFrame.maxY * 2 - newBall.position.y
+//        }
         return newBall
     }
     
@@ -86,11 +90,11 @@ struct Board {
         let coordinate: Size = calcCoordinate(position: ball.position)
         let lastCoordinate: Size = calcCoordinate(position: ball.lastPosition)
         if 0 > coordinate.x || coordinate.x >= size.x || 0 > coordinate.y || coordinate.y >= size.y {
-            print("error occured, ball is going out of wall")
-            print("color:", ball.color)
-            print("coordinate:", coordinate)
-            print("position: ", ball.position, boardFrame.maxY)
-            
+//            print("error occured, ball is going out of wall")
+//            print("color:", ball.color)
+//            print("coordinate:", coordinate)
+//            print("position: ", ball.position, boardFrame.maxY)
+//            
             return (ball, bricks)
         }
         var isToggled = false
@@ -109,6 +113,19 @@ struct Board {
             newBall.toggleDirectionY()
         }
         return (newBall, newBricks)
+    }
+    
+    func checkConflictWithBar(ball: Ball) -> Ball {
+        var newBall = ball
+        if (barPosition.y - ball.lastPosition.y) >= -5 &&
+            (ball.position.y - barPosition.y) >= -5 &&
+            barPosition.x - 50 < ball.position.x &&
+            ball.position.x < barPosition.x + 50
+        {
+            newBall.toggleDirectionY()
+            newBall.position.y = ball.position.y * 2 - barPosition.y
+        }
+        return newBall
     }
     
     func calcCoordinate(position: CGPoint) -> Size {

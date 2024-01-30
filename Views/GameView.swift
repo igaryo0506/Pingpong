@@ -9,41 +9,17 @@ import SwiftUI
 
 struct GameView: View {
     @ObservedObject var gameViewModel: GameViewModel = .init()
-    @State var dragLocation: CGPoint = .init(x: 100, y: 0)
+    @Binding var showingView: ContentView.Views
     var body: some View {
         ZStack {
             VStack {
                 Spacer(minLength: 100)
-                GeometryReader { proxy in
-                    Grid(horizontalSpacing: 1, verticalSpacing: 1) {
-                        ForEach(0 ..< gameViewModel.board.bricks.count, id: \.self) { lineIndex in
-                            GridRow {
-                                ForEach(0 ..< gameViewModel.board.bricks[lineIndex].count, id: \.self) { pixelIndex in
-                                    BrickView(brick: $gameViewModel.board.bricks[lineIndex][pixelIndex])
-                                }
-                            }
-                        }
-                    }
-                    .onAppear{
-                        gameViewModel.prepare(boardFrame: proxy.frame(in: .global))
-                    }
-                }
-                ZStack(alignment: .leading) {
-                    Rectangle()
-                        .foregroundStyle(.clear)
-                        .contentShape(Rectangle())
-                        .frame(height: 100)
-                        .gesture(
-                            DragGesture(minimumDistance: 1, coordinateSpace: .global)
-                                .onChanged { value in
-                                  self.dragLocation = value.location
-                                    print(dragLocation.x)
-                                }
-                        )
-                    Rectangle()
-                        .frame(width: 100, height: 10)
-                        .offset(x: dragLocation.x - 50)
-                }
+                BoardView(
+                    bricks: $gameViewModel.board.bricks,
+                    prepare: { boardFrame in
+                        gameViewModel.prepare(boardFrame: boardFrame)
+                    })
+                BarStackView(location: $gameViewModel.board.barPosition)
             }
             ForEach(0 ..< gameViewModel.board.balls.count, id: \.self) { ballIndex in
                 BallView(ball: $gameViewModel.board.balls[ballIndex])
@@ -55,7 +31,36 @@ struct GameView: View {
     }
 }
 
+struct BarStackView: View {
+    @Binding var location: CGPoint
+    var body: some View {
+        ZStack(alignment: .leading) {
+            Rectangle()
+                .foregroundStyle(.clear)
+                .contentShape(Rectangle())
+                .frame(height: 100)
+                .gesture(
+                    DragGesture(minimumDistance: 1, coordinateSpace: .global)
+                        .onChanged { value in
+                            location.x = value.location.x
+                        }
+                )
+            Rectangle()
+                .frame(width: 100, height: 10)
+                .offset(x: location.x - 50)
+                .background{
+                    GeometryReader { proxy in
+                        Rectangle()
+                            .foregroundStyle(.clear)
+                            .onAppear {
+                                location.y = proxy.frame(in: .global).midY
+                            }
+                    }
+                }
+        }
+    }
+}
 
 #Preview {
-    GameView()
+    GameView(showingView: .constant(.gameView))
 }

@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-struct Brick {
+struct Brick: Equatable {
     var id: UUID = .init()
     var color: Color
     init(color: Color = .white) {

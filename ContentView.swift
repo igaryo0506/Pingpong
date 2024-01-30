@@ -1,8 +1,21 @@
 import SwiftUI
 
 struct ContentView: View {
+    enum Views {
+        case gameView
+        case landingView
+        case scoreView
+    }
+    @State var showingView: Views = .landingView
     var body: some View {
-        GameView()
+        switch(showingView) {
+        case .gameView:
+            GameView(showingView: $showingView)
+        case .landingView:
+            LandingView(showingView: $showingView)
+        case .scoreView:
+            Text("hello")
+        }
     }
 }
 

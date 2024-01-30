@@ -21,7 +21,7 @@ class GameViewModel: ObservableObject {
     }
     
     func start() {
-        Timer.scheduledTimer(withTimeInterval: 0.01, repeats: true) { [weak self] _ in
+        Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [weak self] _ in
             guard let self else { return }
             board.update()
         }
