@@ -6,3 +6,7 @@
 //
 
 import Foundation
+struct Size {
+    let x: Int
+    let y: Int
+}

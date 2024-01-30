@@ -13,12 +13,15 @@ struct Ball {
             lastPosition = oldValue
         }
     }
+    var lastPosition: CGPoint = .zero
     var color: Color
     var direction: CGVector
-    var lastPosition: CGPoint
-    init(position: CGPoint, color: Color, direction: CGVector = .init(dx: 3, dy: 1)) {
+    init(
+        position: CGPoint,
+        color: Color,
+        direction: CGVector = .init(dx: 3, dy: 1)
+    ) {
         self.position = position
-        self.lastPosition = .zero
         self.color = color
         self.direction = direction
     }
