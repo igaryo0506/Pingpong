@@ -4,7 +4,7 @@ struct ContentView: View {
     enum Views {
         case gameView
         case landingView
-        case scoreView
+        case scoreView(score: Int, result: String)
     }
     @State var showingView: Views = .landingView
     var body: some View {
@@ -19,8 +19,10 @@ struct ContentView: View {
             )
         case .landingView:
             LandingView(showingView: $showingView)
-        case .scoreView:
-            Text("hello")
+        case .scoreView(let score, let result):
+            Text(result)
+                .font(.largeTitle)
+            Text("score: \(score)")
         }
     }
 }

@@ -14,6 +14,7 @@ struct Board {
     var barPosition: CGPoint = .init(x: 100, y: 0)
     var enemyBarPosition: CGPoint = .init(x: 100, y: 0)
     var addScore: ((Int) -> ())?
+    var finish: ((String) -> ())?
     
     var width: CGFloat {
         boardFrame.width
@@ -78,14 +79,12 @@ struct Board {
             newBall.toggleDirectionX()
             newBall.position.x = boardFrame.maxX * 2 - newBall.position.x
         }
-//        if boardFrame.minY > ball.position.y {
-//            newBall.toggleDirectionY()
-//            newBall.position.y = boardFrame.minY * 2 - newBall.position.y
-//        }
-//        if boardFrame.maxY <= ball.position.y {
-//            newBall.toggleDirectionY()
-//            newBall.position.y = boardFrame.maxY * 2 - newBall.position.y
-//        }
+        if enemyBarPosition.y - 300 > ball.position.y {
+            finish?("Win")
+        }
+        if barPosition.y + 300 <= ball.position.y {
+            finish?("Lose")
+        }
         return newBall
     }
     
