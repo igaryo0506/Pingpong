@@ -27,13 +27,19 @@ struct GameView: View {
                     }
                 }
                 .padding()
-                BarStackView(location: $gameViewModel.board.enemyBarPosition, color: .white)
+                BarStackView(
+                    location: $gameViewModel.board.enemyBarPosition,
+                    color: .white
+                )
                 BoardView(
                     bricks: $gameViewModel.board.bricks,
                     prepare: { boardFrame in
                         gameViewModel.prepare(boardFrame: boardFrame)
                     })
-                BarStackView(location: $gameViewModel.board.barPosition, color: .black)
+                BarStackView(
+                    location: $gameViewModel.board.barPosition,
+                    color: .black
+                )
             }
             ForEach(0 ..< gameViewModel.board.balls.count, id: \.self) { ballIndex in
                 BallView(ball: $gameViewModel.board.balls[ballIndex])
@@ -47,37 +53,6 @@ struct GameView: View {
     }
 }
 
-struct BarStackView: View {
-    @Binding var location: CGPoint
-    var color: Color
-    var body: some View {
-        ZStack(alignment: .leading) {
-            Rectangle()
-                .foregroundStyle(.clear)
-                .contentShape(Rectangle())
-                .frame(height: 100)
-                .gesture(
-                    DragGesture(minimumDistance: 1, coordinateSpace: .global)
-                        .onChanged { value in
-                            location.x = value.location.x
-                        }
-                )
-            Rectangle()
-                .frame(width: 100, height: 10)
-                .offset(x: location.x - 50)
-                .foregroundStyle(color)
-                .background{
-                    GeometryReader { proxy in
-                        Rectangle()
-                            .foregroundStyle(.clear)
-                            .onAppear {
-                                location.y = proxy.frame(in: .global).midY
-                            }
-                    }
-                }
-        }
-    }
-}
 
 #Preview {
     GameView(gameViewModel: .init(changeShowingView: {_ in}))

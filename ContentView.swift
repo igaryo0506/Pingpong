@@ -20,9 +20,11 @@ struct ContentView: View {
         case .landingView:
             LandingView(showingView: $showingView)
         case .scoreView(let score, let result):
-            Text(result)
-                .font(.largeTitle)
-            Text("score: \(score)")
+            ResultView(
+                showingView: $showingView,
+                result: result,
+                score: score
+            )
         }
     }
 }

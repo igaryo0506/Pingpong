@@ -33,12 +33,12 @@ struct Board {
             .init(
                 position: .init(x: boardFrame.midX, y: boardFrame.minY + 100),
                 color: .white,
-                direction: .init(dx: 24, dy: 18)
+                direction: .init(dx: 3, dy: 4)
             ),
             .init(
                 position: .init(x: boardFrame.midX, y: boardFrame.maxY - 100),
                 color: .black,
-                direction: .init(dx: 4, dy: 4)
+                direction: .init(dx: 7, dy: 5)
             )
         ]
         self.boardFrame = boardFrame
