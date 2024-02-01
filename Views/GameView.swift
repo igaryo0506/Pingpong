@@ -10,9 +10,15 @@ import SwiftUI
 struct GameView: View {
     @ObservedObject var gameViewModel: GameViewModel = .init()
     @Binding var showingView: ContentView.Views
+    private var safeareaInsets: UIEdgeInsets {
+        let scenes = UIApplication.shared.connectedScenes
+        let windowScene = scenes.first as? UIWindowScene
+        return windowScene?.windows.first?.safeAreaInsets ?? .init()
+    }
     var body: some View {
         ZStack {
             VStack {
+                Text("Score: \(gameViewModel.score)")
                 Spacer(minLength: 100)
                 BoardView(
                     bricks: $gameViewModel.board.bricks,
@@ -23,11 +29,13 @@ struct GameView: View {
             }
             ForEach(0 ..< gameViewModel.board.balls.count, id: \.self) { ballIndex in
                 BallView(ball: $gameViewModel.board.balls[ballIndex])
-                    .position(CGPoint(x: gameViewModel.board.balls[ballIndex].position.x, y: gameViewModel.board.balls[ballIndex].position.y))
+                    .position(CGPoint(x: gameViewModel.board.balls[ballIndex].position.x - safeareaInsets.left, y: gameViewModel.board.balls[ballIndex].position.y - safeareaInsets.top))
             }
         }
         .background(.gray)
-        .ignoresSafeArea()
+        .onAppear {
+            print(safeareaInsets)
+        }
     }
 }
 

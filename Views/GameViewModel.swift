@@ -8,16 +8,23 @@
 import SwiftUI
 class GameViewModel: ObservableObject {
     @Published var board: Board
-    private let xLength = 8
-    private let yLength = 16
+    @Published var score: Int = 0
+    private let xLength = 16
+    private let yLength = 32
     init() {
         let bricks: [[Brick]] = Array(repeating: Array(repeating: .init(color: .black), count: xLength), count: yLength / 2) + Array(repeating: Array(repeating: .init(), count: xLength), count: yLength / 2)
-        self.board = .init(bricks: bricks, size: .init(x: xLength, y: yLength))
-        start()
+        self.board = .init(
+            bricks: bricks,
+            size: .init(x: xLength, y: yLength)
+        )
     }
     
     func prepare(boardFrame: CGRect) {
+        board.addScore = { [weak self] point in
+            self?.score += point
+        }
         board.setBalls(boardFrame: boardFrame)
+        start()
     }
     
     func start() {
