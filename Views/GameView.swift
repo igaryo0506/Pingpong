@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct GameView: View {
-    @ObservedObject var gameViewModel: GameViewModel = .init()
-    @Binding var showingView: ContentView.Views
+    @StateObject var gameViewModel: GameViewModel
     private var safeareaInsets: UIEdgeInsets {
         let scenes = UIApplication.shared.connectedScenes
         let windowScene = scenes.first as? UIWindowScene
@@ -18,14 +17,23 @@ struct GameView: View {
     var body: some View {
         ZStack {
             VStack {
-                Text("Score: \(gameViewModel.score)")
-                Spacer(minLength: 100)
+                ZStack {
+                    Text("Score: \(gameViewModel.score)")
+                    HStack {
+                        Button("Back") {
+                            gameViewModel.back()
+                        }
+                        Spacer()
+                    }
+                }
+                .padding()
+                BarStackView(location: $gameViewModel.board.enemyBarPosition, color: .white)
                 BoardView(
                     bricks: $gameViewModel.board.bricks,
                     prepare: { boardFrame in
                         gameViewModel.prepare(boardFrame: boardFrame)
                     })
-                BarStackView(location: $gameViewModel.board.barPosition)
+                BarStackView(location: $gameViewModel.board.barPosition, color: .black)
             }
             ForEach(0 ..< gameViewModel.board.balls.count, id: \.self) { ballIndex in
                 BallView(ball: $gameViewModel.board.balls[ballIndex])
@@ -41,6 +49,7 @@ struct GameView: View {
 
 struct BarStackView: View {
     @Binding var location: CGPoint
+    var color: Color
     var body: some View {
         ZStack(alignment: .leading) {
             Rectangle()
@@ -56,6 +65,7 @@ struct BarStackView: View {
             Rectangle()
                 .frame(width: 100, height: 10)
                 .offset(x: location.x - 50)
+                .foregroundStyle(color)
                 .background{
                     GeometryReader { proxy in
                         Rectangle()
@@ -70,5 +80,5 @@ struct BarStackView: View {
 }
 
 #Preview {
-    GameView(showingView: .constant(.gameView))
+    GameView(gameViewModel: .init(changeShowingView: {_ in}))
 }

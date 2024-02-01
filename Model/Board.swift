@@ -12,6 +12,7 @@ struct Board {
     private var boardFrame: CGRect = .zero
     let size: Size
     var barPosition: CGPoint = .init(x: 100, y: 0)
+    var enemyBarPosition: CGPoint = .init(x: 100, y: 0)
     var addScore: ((Int) -> ())?
     
     var width: CGFloat {
@@ -31,12 +32,12 @@ struct Board {
             .init(
                 position: .init(x: boardFrame.midX, y: boardFrame.minY + 100),
                 color: .white,
-                direction: .init(dx: 5, dy: 10)
+                direction: .init(dx: 24, dy: 18)
             ),
             .init(
                 position: .init(x: boardFrame.midX, y: boardFrame.maxY - 100),
                 color: .black,
-                direction: .init(dx: 4, dy: 3)
+                direction: .init(dx: 4, dy: 4)
             )
         ]
         self.boardFrame = boardFrame
@@ -48,6 +49,9 @@ struct Board {
         for ball in balls {
             var newBall = ball
             newBall.update()
+            if ball.color == .white {
+                enemyBarPosition.x = ball.position.x
+            }
             (newBall, newBricks) = checkConflict(ball: newBall, oldBricks: newBricks)
             newBalls += [newBall]
         }
@@ -74,10 +78,10 @@ struct Board {
             newBall.toggleDirectionX()
             newBall.position.x = boardFrame.maxX * 2 - newBall.position.x
         }
-        if boardFrame.minY > ball.position.y {
-            newBall.toggleDirectionY()
-            newBall.position.y = boardFrame.minY * 2 - newBall.position.y
-        }
+//        if boardFrame.minY > ball.position.y {
+//            newBall.toggleDirectionY()
+//            newBall.position.y = boardFrame.minY * 2 - newBall.position.y
+//        }
 //        if boardFrame.maxY <= ball.position.y {
 //            newBall.toggleDirectionY()
 //            newBall.position.y = boardFrame.maxY * 2 - newBall.position.y
@@ -129,16 +133,19 @@ struct Board {
             newBall.position.y = ball.position.y * 2 - barPosition.y
             addScore?(5)
         }
+        if (ball.lastPosition.y - enemyBarPosition.y) >= -5 &&
+            (enemyBarPosition.y - ball.position.y) >= -5 &&
+            enemyBarPosition.x - 50 < ball.position.x &&
+            ball.position.x < enemyBarPosition.x + 50
+        {
+            newBall.toggleDirectionY()
+            newBall.position.y = ball.position.y * 2 - enemyBarPosition.y
+            addScore?(5)
+        }
         return newBall
     }
     
     func calcCoordinate(position: CGPoint) -> Size {
-        print(
-            Size(
-                x: Int((position.x - boardFrame.minX) / (width / CGFloat(size.x))),
-                y: Int((position.y - boardFrame.minY) / (height / CGFloat(size.y)))
-            )
-        )
         return .init(
             x: Int((position.x - boardFrame.minX) / (width / CGFloat(size.x))),
             y: Int((position.y - boardFrame.minY) / (height / CGFloat(size.y)))

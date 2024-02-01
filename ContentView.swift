@@ -10,7 +10,13 @@ struct ContentView: View {
     var body: some View {
         switch(showingView) {
         case .gameView:
-            GameView(showingView: $showingView)
+            GameView(
+                gameViewModel: .init(
+                    changeShowingView: { view in
+                        showingView = view
+                    }
+                )
+            )
         case .landingView:
             LandingView(showingView: $showingView)
         case .scoreView:
@@ -26,8 +32,5 @@ struct BrickView: View {
     var body: some View {
         Rectangle()
             .foregroundStyle(brick.color)
-            .onTapGesture {
-                brick.toggle()
-            }
     }
 }
