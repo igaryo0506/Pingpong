@@ -31,14 +31,16 @@ struct Board {
     mutating func setBalls(boardFrame: CGRect) {
         self.balls = [
             .init(
-                position: .init(x: boardFrame.midX, y: boardFrame.minY + 100),
+                position: .init(x: boardFrame.midX, y: boardFrame.minY),
                 color: .white,
-                direction: .init(dx: 3, dy: 4)
+                direction: .init(dx: 3.0 / 5, dy: 4.0 / 5),
+                speed: 10.0
             ),
             .init(
-                position: .init(x: boardFrame.midX, y: boardFrame.maxY - 100),
+                position: .init(x: boardFrame.midX, y: boardFrame.maxY),
                 color: .black,
-                direction: .init(dx: 7, dy: 5)
+                direction: .init(dx: 3.0 / 5, dy: 4.0 / 5),
+                speed: 10.0
             )
         ]
         self.boardFrame = boardFrame
@@ -128,6 +130,8 @@ struct Board {
             barPosition.x - 50 < ball.position.x &&
             ball.position.x < barPosition.x + 50
         {
+            let offset = ball.position.x - barPosition.x
+            newBall.conflictWithBar(offset: offset)
             newBall.toggleDirectionY()
             newBall.position.y = ball.position.y * 2 - barPosition.y
             addScore?(5)

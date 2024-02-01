@@ -35,9 +35,14 @@ class GameViewModel: ObservableObject {
     }
     
     func start() {
-        timer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            board.update()
+        Task { @MainActor in
+            try await Task.sleep(nanoseconds: 1000 * 1000 * 1000)
+            await MainActor.run {
+                timer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [weak self] _ in
+                    guard let self else { return }
+                    board.update()
+                }
+            }
         }
     }
     
