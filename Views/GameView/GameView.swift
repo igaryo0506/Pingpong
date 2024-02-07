@@ -18,7 +18,7 @@ struct GameView: View {
         ZStack {
             VStack {
                 ZStack {
-                    Text("Score: \(gameViewModel.score)")
+                    // Text("Score: \(gameViewModel.score)")
                     HStack {
                         Button("Back") {
                             gameViewModel.back()
