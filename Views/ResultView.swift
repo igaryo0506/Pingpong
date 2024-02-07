@@ -12,10 +12,10 @@ struct ResultView: View {
     var result: String
     var score: Int
     var body: some View {
-        VStack {
+        VStack(spacing: 32) {
             Text(result)
                 .font(.largeTitle)
-            Text("score: \(score)")
+            // Text("score: \(score)")
             Button("Back to Title") {
                 showingView = .landingView
             }

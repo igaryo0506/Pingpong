@@ -1,12 +1,12 @@
 //
-//  GameViewModel.swift
-//  Pingpong
+//  MultiGameViewModel.swift
 //
-//  Created by 五十嵐諒 on 2024/01/30.
+//
+//  Created by 五十嵐諒 on 2024/02/01.
 //
 
 import SwiftUI
-class GameViewModel: ObservableObject {
+class MultiGameViewModel: ObservableObject {
     @Published var board: Board
     @Published var score: Int = 0
     private let xLength = 16
@@ -18,7 +18,7 @@ class GameViewModel: ObservableObject {
         self.board = .init(
             bricks: bricks,
             size: .init(x: xLength, y: yLength),
-            gameMode: .single
+            gameMode: .multi
         )
         self.changeShowingView = changeShowingView
     }

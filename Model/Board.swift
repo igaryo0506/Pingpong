@@ -15,6 +15,7 @@ struct Board {
     var enemyBarPosition: CGPoint = .init(x: 100, y: 0)
     var addScore: ((Int) -> ())?
     var finish: ((String) -> ())?
+    var gameMode: GameMode = .single
     
     var width: CGFloat {
         boardFrame.width
@@ -23,9 +24,10 @@ struct Board {
         boardFrame.height
     }
     
-    init(bricks: [[Brick]], size: Size) {
+    init(bricks: [[Brick]], size: Size, gameMode: GameMode) {
         self.bricks = bricks
         self.size = size
+        self.gameMode = gameMode
     }
     
     mutating func setBalls(boardFrame: CGRect) {
@@ -39,7 +41,7 @@ struct Board {
             .init(
                 position: .init(x: boardFrame.midX, y: boardFrame.maxY),
                 color: .black,
-                direction: .init(dx: 3.0 / 5, dy: 4.0 / 5),
+                direction: .init(dx: -3.0 / 5, dy: -4.0 / 5),
                 speed: 10.0
             )
         ]
@@ -52,8 +54,10 @@ struct Board {
         for ball in balls {
             var newBall = ball
             newBall.update()
-            if ball.color == .white {
-                enemyBarPosition.x = ball.position.x
+            if gameMode == .single {
+                if ball.color == .white {
+                    enemyBarPosition.x = ball.position.x
+                }
             }
             (newBall, newBricks) = checkConflict(ball: newBall, oldBricks: newBricks)
             newBalls += [newBall]

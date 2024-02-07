@@ -10,10 +10,24 @@ import SwiftUI
 struct LandingView: View {
     @Binding var showingView: ContentView.Views
     var body: some View {
-        Button {
-            showingView = .gameView
-        } label: {
-            Text("Start")
+        VStack(spacing: 64) {
+            Text("Ping Pong Wars")
+                .font(.largeTitle)
+                .bold()
+            VStack(spacing: 16) {
+                Button {
+                    showingView = .gameView
+                } label: {
+                    Text("Single Player")
+                        .font(.title2)
+                }
+                Button {
+                    showingView = .gameView
+                } label: {
+                    Text("Multi Player")
+                        .font(.title2)
+                }
+            }
         }
     }
 }
